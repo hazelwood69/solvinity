@@ -29,7 +29,7 @@
     "extensionName": "solvinity",
     "storageAccountType": "Standard_LRS",
     "publicIPAddressType": "Dynamic",
-    "vmName": "solvinityvm"
+    "vmName": "solvinity-vm01"
     "vmStorageAccountContainerName": "[concat('vhds-',variables('vmName'))]",
     "vmSize": "Standard_D1",
     "storageaccountname": "[toLower(parameters('storageaccountname'))]",
