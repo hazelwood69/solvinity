@@ -1,0 +1,228 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique DNS Name for the Storage Account where the Virtual Machine's disks will be placed."
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the Virtual Machine."
+      }
+    },
+  },
+  "variables": {
+    "imagePublisher": "OpenLogic",
+    "imageOffer": "CentOS",
+    "skuOSVersion": "7.1",    
+    "OSDiskName": "[concat(variables('imagePublisher'),'-',variables('imageOffer'),'-',variables('skuOSVersion'),parameters('vmName'))]",
+    "extensionName": "solvinity",
+    "storageAccountType": "Standard_LRS",
+    "publicIPAddressType": "Dynamic",
+    "vmName": "solvinityvm"
+    "vmStorageAccountContainerName": "[concat('vhds-',variables('vmName'))]",
+    "vmSize": "Standard_D1",
+    "storageaccountname": "[toLower(parameters('storageaccountname'))]",
+    "addressPrefix" : "192.168.100.0/24",
+    "vmnicname": "[concat(parameters('vmName'),'-nic')]",
+    "vnetname": "[concat(resourceGroup().Name,'-vnet')]",
+    "subnetname": "[concat(resourceGroup().Name,'-subnet')]",
+    "publicipname": "[concat(parameters('vmName'),'-publicIP')]",
+    "sgname": "[concat(resourceGroup().Name,'-sg')]",
+    "avSetName": "[concat(resourceGroup().Name,'-avset')]",
+    "dnsname":  "[concat(resourceGroup().Name,'-dns')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('storageaccountname')]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "accountType": "[variables('storageAccountType')]"
+      }
+    },
+    {  
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[variables('avSetName')]",
+      "location": "[resourceGroup().location]"
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicipname')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[toLower(variables('dnsname'))]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('vnetname')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgname'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetname')]",
+            "properties": {
+              "addressPrefix": "[variables('addressPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgname'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('vmnicname')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('vnetname'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+               "publicIPAddress": {
+                  "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicipname'))]"
+               },
+              "subnet": {
+                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetname')),'/subnets/',variables('subnetname'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('vmName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storageaccountname'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('vmnicname'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "osProfile": {
+          "computername": "[variables('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('skuOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osDisk1",
+            "vhd": {
+              "uri": "[concat('http://',variables('storageaccountname'),'.blob.core.windows.net/',variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('vmnicname'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('nsgname')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "web-rule",
+            "properties": {
+              "description": "Allow WEB",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('vmName'),'/', variables('extensionName'))]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "DockerExtension",
+        "typeHandlerVersion": "1.0",
+        "autoUpgradeMinorVersion": true,
+        "settings": {}
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('vmName'),'/installcustomscript')]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]",
+        "[resourceid('Microsoft.Compute/virtualMachines/extensions',variables('vmName'), variables('extensionName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.OSTCExtensions",
+        "type": "CustomScriptForLinux",
+        "typeHandlerVersion": "1.4",
+        "settings": {
+          "fileUris": ["https://raw.githubusercontent.com/hazelwood69/solvinity/master/startup_script/onstart.sh"],
+          "commandToExecute": "sh onstart.sh"
+        }
+      }
+    }
+  ]
+}
