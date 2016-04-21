@@ -29,7 +29,7 @@
     "extensionName": "solvinity",
     "storageAccountType": "Standard_LRS",
     "publicIPAddressType": "Dynamic",
-    "vmName": "solvinity-vm01"
+    "vmName": "solvinity-vm01",
     "vmStorageAccountContainerName": "[concat('vhds-',variables('vmName'))]",
     "vmSize": "Standard_D1",
     "storageaccountname": "[toLower(parameters('storageaccountname'))]",
@@ -40,7 +40,7 @@
     "publicipname": "[concat(parameters('vmName'),'-publicIP')]",
     "sgname": "[concat(resourceGroup().Name,'-sg')]",
     "avSetName": "[concat(resourceGroup().Name,'-avset')]",
-    "dnsname":  "[concat(resourceGroup().Name,'-dns')]"
+    "dnsname":  "[concat(resourceGroup().Name,'-dns')]",
   },
   "resources": [
     {

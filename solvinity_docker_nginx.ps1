@@ -7,14 +7,14 @@ Param(
 Login-AzureRmAccount
 
 $tmp_dir = "c:\temp\solvinity-" + (Get-Date -UFormat %s)
-mkdir $temp_dir
-Set-Location $temp_dir
+mkdir $tmp_dir
+Set-Location $tmp_dir
 git clone https://github.com/hazelwood69/solvinity.git
 
 New-AzureRmResourceGroupDeployment  -Name $deploy_name `
                                     -ResourceGroupName $rg_name `
-                                    -TemplateFile "$temp_dir\azr_template\azuredeploy_solvinity.json" `
-                                    -TemplateParameterFile "$temp_dir\azr_template\azuredeploy_params_solvinity.json"
+                                    -TemplateFile "$tmp_dir\solvinity\azr_template\azuredeploy_solvinity.json" `
+                                    -TemplateParameterFile "$tmp_dir\solvinity\azr_template\azuredeploy_params_solvinity.json"
 
 $publicIP = Get-AzureRMPublicIPAddress -ResourceGroupName $rg_name -Name ($vmname + "-publicIP")
 $url = ('http://' + $publicIP.dnsSettings.FQDN)
