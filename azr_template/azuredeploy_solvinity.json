@@ -90,33 +90,6 @@
             "name": "[variables('subnetname')]",
             "properties": {
               "addressPrefix": "[variables('addressPrefix')]",
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('sgname'))]"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/networkSecurityGroups",
-      "name": "[variables('sgname')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "securityRules": [
-          {
-            "name": "rule",
-            "properties": {
-              "description": "Allow all",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "*",
-              "sourceAddressPrefix": "*",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 101,
-              "direction": "Inbound"
             }
           }
         ]
@@ -144,10 +117,7 @@
               }
             }
           }
-        ],
-        "networkSecurityGroup": {
-          "id": "[variables('sgID')]"
-        }
+        ]
       }
     },
     {
