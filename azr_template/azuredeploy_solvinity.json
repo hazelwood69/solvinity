@@ -22,9 +22,9 @@
     },
   },
   "variables": {
-    "imagePublisher": "OpenLogic",
-    "imageOffer": "CentOS",
-    "skuOSVersion": "7.1", 
+    "imagePublisher": "Canonical",
+    "imageOffer": "UbuntuServer",
+    "skuOSVersion": "14.04.2-LTS", 
     "vmName": "solvinity-vm01",
     "OSDiskName": "[concat(variables('imagePublisher'),'-',variables('imageOffer'),'-',variables('skuOSVersion'),variables('vmName'))]",
     "extensionName": "solvinity",

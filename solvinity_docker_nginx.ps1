@@ -18,7 +18,10 @@ New-AzureRmResourceGroupDeployment  -Name $deploy_name `
 
 $publicIP = Get-AzureRMPublicIPAddress -ResourceGroupName $rg_name -Name ($vmname + "-publicIP")
 $url = ('http://' + $publicIP.dnsSettings.FQDN)
+Write-Host "publicIP: " + $publicIP
+Write-Host "url: " + $url
+
 $response = Invoke-WebRequest -Uri $url
 
 if ($response.StatusCode -eq 200) { Start $url }
-else { Write-Host "Error! Status code $($response.StatusCode)" -foregroundcolor "orange" }
+else { Write-Host "Error! Status code $($response.StatusCode)" -foregroundcolor "red" }
