@@ -39,6 +39,7 @@
     "subnetname": "[concat(resourceGroup().Name,'-subnet')]",
     "publicipname": "[concat(variables('vmName'),'-publicIP')]",
     "sgname": "[concat(resourceGroup().Name,'-sg')]",
+    "sgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('sgName'))]",
     "avSetName": "[concat(resourceGroup().Name,'-avset')]",
     "dnsname":  "[concat(resourceGroup().Name,'-dns')]",
   },
@@ -145,7 +146,7 @@
           }
         ],
         "networkSecurityGroup": {
-          "id": "[variables('sgname')]"
+          "id": "[variables('sgID')]"
         }
       }
     },
