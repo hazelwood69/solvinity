@@ -143,11 +143,11 @@
               }
             }
           }
-        ]
-      },
-      "networkSecurityGroup": {
+        ],
+        "networkSecurityGroup": {
           "id": "[variables('sgname')]"
-      },
+        }
+      }
     },
     {
       "apiVersion": "2015-06-15",
