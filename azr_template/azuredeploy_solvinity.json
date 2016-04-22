@@ -120,7 +120,10 @@
             }
           }
         ]
-      }
+      },
+      "networkSecurityGroup": {
+          "id": "[variables('sgname')]"
+      },
     },
     {
       "apiVersion": "2015-06-15",
@@ -175,11 +178,11 @@
           {
             "name": "web-rule",
             "properties": {
-              "description": "Allow WEB",
+              "description": "Allow all",
               "protocol": "Tcp",
               "sourcePortRange": "*",
-              "destinationPortRange": "80",
-              "sourceAddressPrefix": "Internet",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
               "destinationAddressPrefix": "*",
               "access": "Allow",
               "priority": 101,
@@ -203,6 +206,25 @@
         "typeHandlerVersion": "1.0",
         "autoUpgradeMinorVersion": true,
         "settings": {}
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('vmName'),'/installcustomscript')]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]",
+        "[resourceid('Microsoft.Compute/virtualMachines/extensions',variables('vmName'), variables('extensionName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.OSTCExtensions",
+        "type": "CustomScriptForLinux",
+        "typeHandlerVersion": "1.4",
+        "settings": {
+          "fileUris": ["https://raw.githubusercontent.com/hazelwood69/solvinity/master/startup_script/onstart.sh"],
+          "commandToExecute": "sh onstart.sh"
+        }
       }
     }
   ]
