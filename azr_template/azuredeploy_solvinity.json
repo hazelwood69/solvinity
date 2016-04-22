@@ -76,7 +76,7 @@
       "name": "[variables('vnetname')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgname'))]"
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('sgname'))]"
       ],
       "properties": {
         "addressSpace": {
@@ -90,7 +90,7 @@
             "properties": {
               "addressPrefix": "[variables('addressPrefix')]",
               "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgname'))]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('sgname'))]"
               }
             }
           }
@@ -168,7 +168,7 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkSecurityGroups",
-      "name": "[variables('nsgname')]",
+      "name": "[variables('sgname')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "securityRules": [
