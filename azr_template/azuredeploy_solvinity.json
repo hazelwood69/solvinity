@@ -76,9 +76,6 @@
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('vnetname')]",
       "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/networkSecurityGroups/', variables('sgname'))]"
-      ],
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
