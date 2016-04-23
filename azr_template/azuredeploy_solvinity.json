@@ -27,19 +27,19 @@
     "skuOSVersion": "14.04.2-LTS", 
     "vmName": "solvinity-vm01",
     "OSDiskName": "[concat(variables('imagePublisher'),'-',variables('imageOffer'),'-',variables('skuOSVersion'),variables('vmName'))]",
-    "extensionName": "solvinity",
+    "extensionName": "docker-solvinity",
     "storageAccountType": "Standard_LRS",
     "publicIPAddressType": "Dynamic",
     "vmStorageAccountContainerName": "[concat('vhds-',variables('vmName'))]",
     "vmSize": "Standard_D1",
-    "storageaccountname": "[toLower(parameters('storageaccountname'))]",
+    "storageaccountname": "[toLower(parameters('storageAccountName'))]",
     "addressPrefix" : "192.168.100.0/24",
     "vmnicname": "[concat(variables('vmName'),'-nic')]",
     "vnetname": "[concat(resourceGroup().Name,'-vnet')]",
     "subnetname": "[concat(resourceGroup().Name,'-subnet')]",
     "publicipname": "[concat(variables('vmName'),'-publicIP')]",
     "sgname": "[concat(resourceGroup().Name,'-sg')]",
-    "sgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('sgName'))]",
+    "sgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('sgname'))]",
     "avSetName": "[concat(resourceGroup().Name,'-avset')]",
     "dnsname":  "[concat(resourceGroup().Name,'-dns')]",
   },
@@ -67,7 +67,7 @@
       "properties": {
         "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
         "dnsSettings": {
-          "domainNameLabel": "[toLower(variables('dnsname'))]"
+          "domainNameLabel": "[variables('dnsname')]"
         }
       }
     },
@@ -76,6 +76,9 @@
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('vnetname')]",
       "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('sgname'))]"
+      ],
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
@@ -87,6 +90,9 @@
             "name": "[variables('subnetname')]",
             "properties": {
               "addressPrefix": "[variables('addressPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('sgname'))]"
+              }
             }
           }
         ]
@@ -158,6 +164,44 @@
             }
           ]
         }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('sgname')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "http_rule",
+            "properties": {
+              "description": "Allow WEB",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1001,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "ssh_rule",
+            "properties": {
+              "description": "Allow SSH",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1002,
+              "direction": "Inbound"
+            }
+          }
+        ]
       }
     },
     {
