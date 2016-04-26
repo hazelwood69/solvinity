@@ -121,6 +121,9 @@
             }
           }
         ]
+      },
+      "networkSecurityGroup":  {
+          "id": "[variables('sgID')]",
       }
     },
     {
