@@ -158,10 +158,10 @@
               }
             }
           }
-        ]
-      },
-      "networkSecurityGroup":  {
+        ],
+        "networkSecurityGroup":  {
           "id": "[variables('sgID')]",
+        },
       },
     },
     {
